@@ -10,12 +10,7 @@ def generate_launch_description():
         ),
         Node(
             package='robot_controller',
-            executable='action_publisher_node',
-            name='action_publisher_node'
-        ),
-        Node(
-            package='robot_controller',
-            executable='controller_node',
-            name='controller_node'
+            executable='state_viewer_node',
+            name='state_viewer_node'
         ),
     ])
