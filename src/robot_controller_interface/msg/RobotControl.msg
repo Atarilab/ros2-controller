@@ -1,4 +1,3 @@
-float64[] joint_torques
-float64[] pd_target
-float64[] joint_kp
-float64[] joint_kd
+sensor_msgs/JointState joint_ctrl
+float64 joint_kp
+float64 joint_kd

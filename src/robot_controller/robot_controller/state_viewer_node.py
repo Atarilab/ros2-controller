@@ -17,9 +17,10 @@ class StateSubscriberNode(Node):
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
-                
+        self.last_state = RobotState()
+
     def listener_callback(self, msg):
-        # self.get_logger().info(f'Received robot state: {msg}')
+        self.last_state = msg
         pass
 
 class ViewerNode(StateSubscriberNode):
@@ -48,27 +49,28 @@ class ViewerNode(StateSubscriberNode):
             if self.stop_viewer:
                 break
             t = time.time()
+            self.update_data()
             viewer.sync()
             render_time = time.time() - t
             time.sleep(max(0, 1 / self.viewer_freq - render_time))
             
         self.stop_viewer = True
         viewer.close()
-                
-    def listener_callback(self, msg):
-        super().listener_callback(msg)
-        # self.get_logger().info(f'Received robot state: {msg}')
-        self.mj_data.qpos[-self.nu:] = np.array(msg.joint_state.position)
-        self.mj_data.qpos[0] = msg.base_state.pose.pose.position.x
-        self.mj_data.qpos[1] = msg.base_state.pose.pose.position.y
-        self.mj_data.qpos[2] = msg.base_state.pose.pose.position.z
-        self.mj_data.qpos[3] = msg.base_state.pose.pose.orientation.x
-        self.mj_data.qpos[4] = msg.base_state.pose.pose.orientation.y
-        self.mj_data.qpos[5] = msg.base_state.pose.pose.orientation.z
-        self.mj_data.qpos[6] = msg.base_state.pose.pose.orientation.w
+    
+    def update_data(self):
+        if len(self.last_state.joint_state.position) == self.nu:
+            self.mj_data.qpos[-self.nu:] = np.array(self.last_state.joint_state.position)
+        self.mj_data.qpos[0] = self.last_state.base_state.pose.pose.position.x
+        self.mj_data.qpos[1] = self.last_state.base_state.pose.pose.position.y
+        self.mj_data.qpos[2] = self.last_state.base_state.pose.pose.position.z
+        self.mj_data.qpos[3] = self.last_state.base_state.pose.pose.orientation.w
+        self.mj_data.qpos[4] = self.last_state.base_state.pose.pose.orientation.x
+        self.mj_data.qpos[5] = self.last_state.base_state.pose.pose.orientation.y
+        self.mj_data.qpos[6] = self.last_state.base_state.pose.pose.orientation.z
         
         mujoco.mj_forward(self.mj_model, self.mj_data)
-        
+                
+
 def main(args=None):
     desc = get_robot_description("go2")
     rclpy.init(args=args)

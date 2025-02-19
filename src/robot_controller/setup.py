@@ -27,6 +27,7 @@ setup(
             'action_publisher_node = robot_controller.action_publisher_node:main',
             'state_publisher_node = robot_controller.state_publisher_node:main',
             'state_viewer_node = robot_controller.state_viewer_node:main',
+            'simulator_node = robot_controller.simulator_node:main',
         ],
     },
 )
