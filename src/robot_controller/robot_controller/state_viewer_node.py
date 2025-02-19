@@ -58,7 +58,15 @@ class ViewerNode(StateSubscriberNode):
     def listener_callback(self, msg):
         super().listener_callback(msg)
         # self.get_logger().info(f'Received robot state: {msg}')
-        self.mj_data.qpos[-self.nu:] = np.array(msg.joint_positions)
+        self.mj_data.qpos[-self.nu:] = np.array(msg.joint_state.position)
+        self.mj_data.qpos[0] = msg.base_state.pose.pose.position.x
+        self.mj_data.qpos[1] = msg.base_state.pose.pose.position.y
+        self.mj_data.qpos[2] = msg.base_state.pose.pose.position.z
+        self.mj_data.qpos[3] = msg.base_state.pose.pose.orientation.x
+        self.mj_data.qpos[4] = msg.base_state.pose.pose.orientation.y
+        self.mj_data.qpos[5] = msg.base_state.pose.pose.orientation.z
+        self.mj_data.qpos[6] = msg.base_state.pose.pose.orientation.w
+        
         mujoco.mj_forward(self.mj_model, self.mj_data)
         
 def main(args=None):

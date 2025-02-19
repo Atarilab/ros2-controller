@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from robot_controller_interface.msg import RobotState
+from geometry_msgs.msg import Point, Quaternion
 import numpy as np
 import time
 
@@ -12,14 +13,24 @@ class StatePublisherNode(Node):
         self.timer = self.create_timer(1 / self.freq, self.publish_state)  # 10 Hz
 
     def publish_state(self):
-        msg = RobotState()
         current_time = time.time()
         sine_value = 0.5 * np.sin(2 * np.pi * 0.5 * current_time)
-        msg.joint_positions = [sine_value] * 12
-        # msg.joint_velocities = [0.0, 0.0, 0.0]  # Example data
-        # msg.joint_torques = [0.0, 0.0, 0.0]  # Example data
+        
+        msg = RobotState()
+        msg.base_state.pose.pose.position = Point(
+            x=sine_value * 0.5,
+            y=sine_value * 0.5,
+            z=sine_value * 0.1 + 0.3
+        )
+        msg.base_state.pose.pose.orientation = Quaternion(
+            x=0.,
+            y=0.,
+            z=0.,
+            w=1.
+        )
+        msg.joint_state.position = [sine_value] * 12
+        
         self.publisher.publish(msg)
-        # self.get_logger().info('Publishing robot state')
 
 def main(args=None):
     rclpy.init(args=args)
